@@ -19,7 +19,7 @@ t_list, s_lists, i_lists, r_lists = sircomp.sir_compartmental(sv_0, iv_0, rv_0, 
 xl = 'Time'
 yl = 'Proportion of population'
 title = 'i(t) Compartments vs Time'
-outfile = 'Q1c_i_plot.png'
+outfile = 'Q2c_i_plot.png'
 
 sircomp.plot_infections_compartmental(t_list=t_list, i_lists=i_lists,
                                       x_label=xl, y_label=yl,

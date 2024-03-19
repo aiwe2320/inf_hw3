@@ -14,6 +14,28 @@ def generate_t_list(t0, dt, tmax):
         t_list = list(range(t0, tmax, dt))
     return t_list
 
+def calculate_average_probability(pv, t_list, s_lists):
+    '''
+    Calculate weighted average probability over time
+    
+    pv : Vector of probabilities
+    t_list: list of times
+    s_lists: list of lists containing s(t)
+    '''
+    
+    pbar_list = []
+    for ndx, time in enumerate(t_list):  # Iterate through all times
+        s_sum = 0
+        ps_sum = 0
+        for group, s_list in enumerate(s_lists):  # For each time, iterate through all groups
+            s_sum += s_list[ndx]
+            ps_sum += pv[group] * s_list[ndx]
+
+        p_t = ps_sum / s_sum  # Calculate p_bar(t)
+        pbar_list.append(p_t)
+    
+    return pbar_list
+
 def sir_compartmental(sv_0, iv_0, rv_0, pv, C, w_inv, gammav, dt, tmax):
     '''
     Run a compartmental SIR simulation for a system with population structure
@@ -85,10 +107,10 @@ def plot_infections_compartmental(t_list, i_lists, x_label, y_label, title, outf
     '''
     num_groups = len(i_lists)
     # Generate labels for each group
-    labels = ['Group ' + str(ndx + 1) for ndx in range(len(i_lists))]
+    labels = ['Group ' + str(ndx + 1) for ndx in range(num_groups)]
     # Generate an even distribution of opacities for each i line
     # The last i group will be the most solid (alpha=1)
-    opacities = [(ndx + 1) * (0.5 / num_groups) for ndx in range(len(i_lists))]
+    opacities = [(ndx + 1) * (0.5 / num_groups) for ndx in range(num_groups)]
     
     fig, ax = plt.subplots()
     for ndx, i_list in enumerate(i_lists): # Plot i data using a loop
@@ -98,5 +120,42 @@ def plot_infections_compartmental(t_list, i_lists, x_label, y_label, title, outf
     ax.set_ylabel(y_label)
     ax.set_title(title)
     ax.legend()
+
+    plt.savefig(outfile, bbox_inches='tight')
+    
+def plot_susceptible_compartmental(t_list, s_lists, x_label, y_label, title, outfile):
+    '''
+    Plot the different susceptible compartments versus time with varying opacity
+    '''
+    num_groups = len(s_lists)
+    # Generate labels for each group
+    labels = ['Group ' + str(ndx + 1) for ndx in range(num_groups)]
+    
+    # Generate an even distribution of opacities for each s line
+    # The last i group will be the most solid (alpha=1)
+    opacities = [(ndx + 1) * (0.5 / num_groups) for ndx in range(num_groups)]
+    
+    fig, ax = plt.subplots()
+    for ndx, s_list in enumerate(s_lists): # Plot s data using a loop
+        ax.plot(t_list, s_list, label=labels[ndx], alpha=opacities[ndx], color='g')
+    
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(title)
+    ax.legend()
+
+    plt.savefig(outfile, bbox_inches='tight')
+    
+def plot_probability(t_list, pbar_list, x_label, y_label, title, outfile):
+    '''
+    Plot the weighted average probability versus time
+    '''
+    
+    fig, ax = plt.subplots()
+    ax.plot(t_list, pbar_list, color='k')
+    
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(title)
 
     plt.savefig(outfile, bbox_inches='tight')
